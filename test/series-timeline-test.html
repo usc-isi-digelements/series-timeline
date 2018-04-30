@@ -68,6 +68,28 @@ limitations under the License.
         expect(element._buildArray(1, 2)).to.deep.equal([1, 2]);
       });
 
+      test('_buildSeriesTransformConfig does work as expected', function() {
+        expect(element._buildSeriesTransformConfig()).to.not.exist;
+        expect(element._buildSeriesTransformConfig('interval', undefined)).to.not.exist;
+        expect(element._buildSeriesTransformConfig(undefined, {
+          key: 'value'
+        })).to.not.exist;
+        expect(element._buildSeriesTransformConfig('interval', {
+          key: 'value'
+        })).to.deep.equal({
+          interval: 'interval',
+          key: 'value'
+        });
+      });
+
+      test('_buildSeriesTransformConfig does copy config', function() {
+        var config = {
+          key: 'value'
+        };
+        var output = element._buildSeriesTransformConfig('interval', config);
+        expect(config).to.not.equal(output);
+      });
+
       test('setting idField and seriesId does set _seriesIdQuery', function() {
         element.idField = 'testIdField';
         expect(element._seriesIdQuery).to.not.exist;
@@ -106,6 +128,28 @@ limitations under the License.
           expect(element.$$('zoomable-bar-chart').hideOverview).to.be.true;
           expect(element.$$('zoomable-bar-chart').load).to.be.true;
           expect(element.$$('zoomable-bar-chart').timeline).to.be.true;
+          done();
+        });
+      });
+
+      test('setting _seriesData to empty array does show text', function(done) {
+        expect(element.$$('.text')).to.not.exist;
+
+        element._seriesData = [];
+
+        flush(function() {
+          expect(element.$$('.text')).to.exist;
+          done();
+        });
+      });
+
+      test('setting _seriesData to non-empty array does show dropdown-menu', function(done) {
+        expect(element.$$('dropdown-menu')).to.not.exist;
+
+        element._seriesData = [{}];
+
+        flush(function() {
+          expect(element.$$('dropdown-menu')).to.exist;
           done();
         });
       });

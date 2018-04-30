@@ -1,7 +1,7 @@
 {
   "name": "series-timeline",
   "description": "A Polymer Element that runs a time-series query and shows the response data in a timeline.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": [
@@ -17,7 +17,9 @@
   "dependencies": {
     "polymer": "Polymer/polymer#2.5.0",
     "build-and-run-query": "DigElements/build-and-run-query#2.5.1",
+    "dropdown-menu": "DigElements/dropdown-menu#2.0.1",
     "elastic-client-query-builder": "DigElements/elastic-client-query-builder#2.1.2",
+    "lodash-import": "DigElements/lodash-import#~1.0.1",
     "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.2.1"
   },
   "devDependencies": {

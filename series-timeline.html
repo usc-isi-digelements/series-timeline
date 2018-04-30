@@ -16,7 +16,9 @@ limitations under the License.
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../build-and-run-query/build-and-run-query.html">
+<link rel="import" href="../dropdown-menu/dropdown-menu.html">
 <link rel="import" href="../elastic-client-query-builder/elastic-client-query-builder.html">
+<link rel="import" href="../lodash-import/lodash.html">
 <link rel="import" href="../zoomable-bar-chart/zoomable-bar-chart.html">
 
 <!--
@@ -42,6 +44,11 @@ A Polymer Element that runs a time-series query and shows the response data in a
     <style>
       :host {
         display: block;
+      }
+
+      dropdown-menu {
+        /* Align with bar chart Y-axis. */
+        margin-left: 50px;
       }
 
       .text {
@@ -80,7 +87,7 @@ A Polymer Element that runs a time-series query and shows the response data in a
       page-size="10000"
       source-exclude="[]"
       source-include="[[sourceInclude]]"
-      transform-config="[[transformConfig]]"
+      transform-config="[[_buildSeriesTransformConfig(interval, transformConfig)]]"
       transform-function="[[transformFunction]]"
       error="{{_seriesDataError}}"
       loading="{{_seriesDataLoading}}"
@@ -96,7 +103,7 @@ A Polymer Element that runs a time-series query and shows the response data in a
         default-label="[[label]]"
         height="85"
         hide-overview
-        interval="day"
+        interval="[[interval]]"
         label-property="text"
         load
         loading="[[_seriesDataLoading]]"
@@ -108,6 +115,15 @@ A Polymer Element that runs a time-series query and shows the response data in a
 
     <template is="dom-if" if="[[!_seriesData.length]]">
       <div class="text">No Time Series Data</div>
+    </template>
+
+    <template is="dom-if" if="[[_seriesData.length]]">
+      <dropdown-menu
+        data='[{"title":"Hourly","value":"hour"},{"title":"Daily","value":"day"},{"title":"Weekly","value":"week"},{"title":"Monthly","value":"month"},{"title":"Yearly","value":"year"}]'
+        label="Date"
+        no-label-float
+        selected="{{interval}}">
+      </dropdown-menu>
     </template>
   </template>
 
@@ -189,6 +205,20 @@ A Polymer Element that runs a time-series query and shows the response data in a
           value: function() {
             return [];
           }
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * The selected time interval.
+         *
+         * @type {String}
+         * @default 'month'
+         */
+        interval: {
+          notify: true,
+          type: String,
+          value: 'month'
         },
 
         /**
@@ -340,10 +370,28 @@ A Polymer Element that runs a time-series query and shows the response data in a
        * @param {Object} one
        * @param {Object} two
        * @return {Array}
+       * @private
        */
       _buildArray: function(one, two) {
         return (one && two) ? [one, two] : [];
       },
+
+      /**
+       * Returns the transform config for the series transform function.
+       *
+       * @param {String} interval
+       * @param {Object} config
+       * @return {Object}
+       * @private
+       */
+      _buildSeriesTransformConfig: function(interval, config) {
+        if(interval && config) {
+          var clonedConfig = _.cloneDeep(config);
+          clonedConfig.interval = interval;
+          return clonedConfig;
+        }
+        return undefined;
+      }
     });
   })();
   </script>
