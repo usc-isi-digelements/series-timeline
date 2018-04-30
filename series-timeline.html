@@ -43,6 +43,11 @@ A Polymer Element that runs a time-series query and shows the response data in a
       :host {
         display: block;
       }
+
+      .text {
+        font-size: 14px;
+        font-weight: 500;
+      }
     </style>
 
     <elastic-client-query-builder
@@ -72,6 +77,7 @@ A Polymer Element that runs a time-series query and shows the response data in a
       index-name="[[indexName]]"
       index-types="[[indexTypes]]"
       aggregations="[]"
+      page-size="10000"
       source-exclude="[]"
       source-include="[[sourceInclude]]"
       transform-config="[[transformConfig]]"
@@ -98,6 +104,10 @@ A Polymer Element that runs a time-series query and shows the response data in a
         stack-property="data"
         timeline>
       </zoomable-bar-chart>
+    </template>
+
+    <template is="dom-if" if="[[!_seriesData.length]]">
+      <div class="text">No Time Series Data</div>
     </template>
   </template>
 

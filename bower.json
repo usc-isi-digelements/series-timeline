@@ -1,7 +1,7 @@
 {
   "name": "series-timeline",
   "description": "A Polymer Element that runs a time-series query and shows the response data in a timeline.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": [
