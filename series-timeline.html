@@ -1,0 +1,340 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../build-and-run-query/build-and-run-query.html">
+<link rel="import" href="../elastic-client-query-builder/elastic-client-query-builder.html">
+<link rel="import" href="../zoomable-bar-chart/zoomable-bar-chart.html">
+
+<!--
+A Polymer Element that runs a time-series query and shows the response data in a timeline.
+
+### Example
+```html
+<series-timeline
+  data-type="measurement"
+  id-field="measure"
+  series-id="ABC123"
+  transform-config="{}"
+  transform-function="[[transformQueryResponseIntoTimelineData]]"
+  type-field="type">
+</series-timeline>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="series-timeline">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <elastic-client-query-builder
+      type="term"
+      fields="[[idField]]"
+      values="[[seriesId]]"
+      ejs-query="{{_seriesIdQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="term"
+      fields="[[typeField]]"
+      values="[[dataType]]"
+      ejs-query="{{_seriesDataTypeQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="bool"
+      bool-function="must"
+      ejs-bool-queries="[[_buildArray(_seriesIdQuery, _seriesDataTypeQuery)]]"
+      ejs-query="{{_seriesDataQuery}}">
+    </elastic-client-query-builder>
+
+    <build-and-run-query
+      query="[[_seriesDataQuery]]"
+      client="[[client]]"
+      index-name="[[indexName]]"
+      index-types="[[indexTypes]]"
+      aggregations="[]"
+      source-exclude="[]"
+      source-include="[[sourceInclude]]"
+      transform-config="[[transformConfig]]"
+      transform-function="[[transformFunction]]"
+      error="{{_seriesDataError}}"
+      loading="{{_seriesDataLoading}}"
+      results="{{_seriesData}}"
+      total="{{_seriesDataTotal}}">
+    </build-and-run-query>
+
+    <template is="dom-if" if="[[_seriesDataQuery]]">
+      <zoomable-bar-chart
+        bar-property="date"
+        data="[[_seriesData]]"
+        default-color="[[color]]"
+        default-label="[[label]]"
+        height="85"
+        hide-overview
+        interval="day"
+        label-property="text"
+        load
+        loading="[[_seriesDataLoading]]"
+        source="[[label]]"
+        stack-property="data"
+        timeline>
+      </zoomable-bar-chart>
+    </template>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'series-timeline',
+
+      properties: {
+        /**
+         * (Required)
+         *
+         * The elasticsearch client object.
+         *
+         * @type {Object}
+         */
+        client: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The timeline bar color.
+         *
+         * @type {String}
+         * @default ''
+         */
+        color: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Required)
+         *
+         * The series data type.
+         *
+         * @type {String}
+         */
+        dataType: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * The series ID field name.
+         *
+         * @type {String}
+         */
+        idField: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * The elasticsearch index name.
+         *
+         * @type {String}
+         */
+        indexName: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * The elasticsearch index types.
+         *
+         * @type {Array}
+         * @default []
+         */
+        indexTypes: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The timeline bar label.
+         *
+         * @type {String}
+         * @default ''
+         */
+        label: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Required)
+         *
+         * The series ID.
+         *
+         * @type {String}
+         */
+        seriesId: {
+          type: String
+        },
+
+        /**
+         * (Optional)
+         *
+         * The source-include for the series data query.
+         *
+         * @type {Array}
+         * @default []
+         */
+        sourceInclude: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Required)
+         *
+         * The series data transform config object.
+         *
+         * @type {Object}
+         */
+        transformConfig: {
+          type: Object
+        },
+
+        /**
+         * (Required)
+         *
+         * The series data transform function.
+         *
+         * @type {Object}
+         */
+        transformFunction: {
+          type: Object
+        },
+
+        /**
+         * (Required)
+         *
+         * The series type field name.
+         *
+         * @type {String}
+         */
+        typeField: {
+          type: String
+        },
+
+        /**
+         * The series data.
+         *
+         * @type {Array}
+         * @private
+         */
+        _seriesData: {
+          type: Array
+        },
+
+        /**
+         * The series data query error.
+         *
+         * @type {Object}
+         * @private
+         */
+        _seriesDataError: {
+          type: Object
+        },
+
+        /**
+         * Whether the series data query is loading.
+         *
+         * @type {Object}
+         * @private
+         */
+        _seriesDataLoading: {
+          type: Boolean
+        },
+
+        /**
+         * The series data query.
+         *
+         * @type {Object}
+         * @private
+         */
+        _seriesDataQuery: {
+          type: Object
+        },
+
+        /**
+         * The series data query total number of hits.
+         *
+         * @type {Number}
+         * @private
+         */
+        _seriesDataTotal: {
+          type: Number
+        },
+
+        /**
+         * The series data type query.
+         *
+         * @type {Object}
+         * @private
+         */
+        _seriesDataTypeQuery: {
+          type: Object
+        },
+
+        /**
+         * The series ID query.
+         *
+         * @type {Object}
+         * @private
+         */
+        _seriesIdQuery: {
+          type: Object
+        }
+      },
+
+      /**
+       * Returns an array with the given arguments or an empty array if either of the arguments is undefined.
+       *
+       * @param {Object} one
+       * @param {Object} two
+       * @return {Array}
+       */
+      _buildArray: function(one, two) {
+        return (one && two) ? [one, two] : [];
+      },
+    });
+  })();
+  </script>
+</dom-module>

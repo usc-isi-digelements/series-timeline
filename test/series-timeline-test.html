@@ -1,0 +1,115 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../series-timeline.html">
+</head>
+
+<body>
+  <test-fixture id="series-timeline-fixture">
+    <template>
+      <series-timeline></series-timeline>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('series-timeline tests', function() {
+      var element;
+
+      setup(function(done) {
+        element = fixture('series-timeline-fixture');
+        flush(done);
+      });
+
+      test('properties are set as expected', function() {
+        expect(element.dataType).to.not.exist;
+        expect(element.idField).to.not.exist;
+        expect(element.seriesId).to.not.exist;
+        expect(element.typeField).to.not.exist;
+        expect(element.client).to.not.exist;
+        expect(element.indexName).to.not.exist;
+        expect(element.indexTypes).to.deep.equal([]);
+        expect(element.sourceInclude).to.deep.equal([]);
+        expect(element.transformConfig).to.not.exist;
+        expect(element.transformFunction).to.not.exist;
+        expect(element.color).to.equal('');
+        expect(element.label).to.equal('');
+        expect(element._seriesData).to.not.exist;
+        expect(element._seriesDataError).to.not.exist;
+        expect(element._seriesDataLoading).to.be.false;
+        expect(element._seriesDataQuery).to.not.exist;
+        expect(element._seriesDataTotal).to.not.exist;
+        expect(element._seriesDataTypeQuery).to.not.exist;
+        expect(element._seriesIdQuery).to.not.exist;
+      });
+
+      test('_buildArray does work as expected', function() {
+        expect(element._buildArray()).to.deep.equal([]);
+        expect(element._buildArray(1, undefined)).to.deep.equal([]);
+        expect(element._buildArray(undefined, 2)).to.deep.equal([]);
+        expect(element._buildArray(1, 2)).to.deep.equal([1, 2]);
+      });
+
+      test('setting idField and seriesId does set _seriesIdQuery', function() {
+        element.idField = 'testIdField';
+        expect(element._seriesIdQuery).to.not.exist;
+        element.seriesId = 'testId';
+        expect(element._seriesIdQuery).to.exist;
+      });
+
+      test('setting dataType and typeField does set _seriesDataTypeQuery', function() {
+        element.dataType = 'testDataType';
+        expect(element._seriesDataTypeQuery).to.not.exist;
+        element.typeField = 'testTypeField';
+        expect(element._seriesDataTypeQuery).to.exist;
+      });
+
+      test('setting both _seriesDataTypeQuery and _seriesIdQuery does set _seriesDataQuery', function() {
+        element.idField = 'testIdField';
+        expect(element._seriesDataQuery).to.not.exist;
+        element.seriesId = 'testId';
+        expect(element._seriesDataQuery).to.not.exist;
+        element.dataType = 'testDataType';
+        expect(element._seriesDataQuery).to.not.exist;
+        element.typeField = 'testTypeField';
+        expect(element._seriesDataQuery).to.exist;
+      });
+
+      test('setting _seriesDataQuery does show zoomable-bar-chart', function(done) {
+        expect(element.$$('zoomable-bar-chart')).to.not.exist;
+
+        element.idField = 'testIdField';
+        element.seriesId = 'testId';
+        element.dataType = 'testDataType';
+        element.typeField = 'testTypeField';
+
+        flush(function() {
+          expect(element.$$('zoomable-bar-chart')).to.exist;
+          expect(element.$$('zoomable-bar-chart').hideOverview).to.be.true;
+          expect(element.$$('zoomable-bar-chart').load).to.be.true;
+          expect(element.$$('zoomable-bar-chart').timeline).to.be.true;
+          done();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
