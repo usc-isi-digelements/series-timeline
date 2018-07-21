@@ -9,18 +9,18 @@
     "polymer"
   ],
   "main": "series-timeline.html",
-  "homepage": "https://github.com/DigElements/series-timeline/",
+  "homepage": "https://github.com/usc-isi-digelements/series-timeline/",
   "ignore": [
     "/.*",
     "/test/"
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#2.5.0",
-    "build-and-run-query": "DigElements/build-and-run-query#2.5.1",
-    "dropdown-menu": "DigElements/dropdown-menu#2.0.1",
-    "elastic-client-query-builder": "DigElements/elastic-client-query-builder#2.1.2",
-    "lodash-import": "DigElements/lodash-import#~1.0.1",
-    "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.2.1"
+    "build-and-run-query": "usc-isi-digelements/build-and-run-query#2.5.1",
+    "dropdown-menu": "usc-isi-digelements/dropdown-menu#2.0.1",
+    "elastic-client-query-builder": "usc-isi-digelements/elastic-client-query-builder#2.1.2",
+    "lodash-import": "usc-isi-digelements/lodash-import#~1.0.1",
+    "zoomable-bar-chart": "usc-isi-digelements/zoomable-bar-chart#2.2.1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^2.0.0",
